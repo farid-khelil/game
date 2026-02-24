@@ -3,7 +3,6 @@ FROM node:20-alpine AS frontend
 WORKDIR /app
 
 # Define build args for Vite env vars
-# For Heroku: WebSocket goes through same host/port as web (proxied by nginx)
 ARG VITE_REVERB_APP_KEY=my-app-key
 ARG VITE_REVERB_HOST
 ARG VITE_REVERB_PORT=443
@@ -26,32 +25,35 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
-# Laravel container with nginx + PHP-FPM + Reverb
-FROM serversideup/php:8.4-fpm-nginx
+# Final production image
+FROM php:8.4-fpm-alpine
 
+# Install system dependencies and PHP extensions
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    && docker-php-ext-install pdo_mysql pcntl
+
+# Set working directory
 WORKDIR /var/www/html
 
-# Copy application
+# Copy application code
 COPY --chown=www-data:www-data . .
 COPY --chown=www-data:www-data --from=frontend /app/public/build public/build
 COPY --chown=www-data:www-data --from=vendor /app/vendor vendor
 
-# Add custom nginx config for WebSocket proxy
-USER root
-COPY docker/nginx-websocket.conf /etc/nginx/site-opts.d/websocket.conf
+# Create necessary directories
+RUN mkdir -p /run/nginx /var/log/nginx /var/log/supervisor \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Add Reverb as S6 service (runs on internal port 6001)
-RUN mkdir -p /etc/s6-overlay/s6-rc.d/reverb /etc/s6-overlay/s6-rc.d/user/contents.d
-COPY docker/reverb-run /etc/s6-overlay/s6-rc.d/reverb/run
-RUN echo "longrun" > /etc/s6-overlay/s6-rc.d/reverb/type && \
-    chmod +x /etc/s6-overlay/s6-rc.d/reverb/run && \
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/reverb
+# Copy configuration files
+COPY docker/nginx-heroku.conf /etc/nginx/nginx.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
-# Heroku entrypoint to set dynamic PORT
-COPY docker/heroku-entrypoint.sh /heroku-entrypoint.sh
-RUN chmod +x /heroku-entrypoint.sh
-
-# Single port exposed - nginx handles both HTTP and WebSocket
 EXPOSE 8080
 
-ENTRYPOINT ["/heroku-entrypoint.sh"]
+CMD ["/start.sh"]
