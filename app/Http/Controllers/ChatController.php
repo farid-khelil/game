@@ -14,6 +14,9 @@ class ChatController extends Controller
     public function index($userid)
 
     {
+        if (auth()->id() == $userid) {
+            return redirect()->route('home')->with('error', 'You cannot chat with yourself.');
+        }
         $user = User::find($userid);
         if (!$user) {
             return redirect()->route('home')->with('error', 'User not found.');

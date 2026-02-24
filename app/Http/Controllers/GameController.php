@@ -12,12 +12,18 @@ use App\Events\move;
 class GameController extends Controller
 {
     public function create(User $user1,User $user2){
+        if ($user1->id == $user2->id){
+            return to_route('home')->with('error','You cannot play with yourself');
+        }
+
         $table = [$user1, $user2];
         $chosen = random_int(0, 1);
         $gameId = Game::create([
             'Oplayer' => $table[$chosen]->id,
             'Xplayer' =>$table[$chosen == 0? 1 : 0 ]->id,
             'turn' => 1,
+            'board' => json_encode(array_fill(0, 9, array_fill(0, 9, null))),
+            'smallboard' => json_encode(array_fill(0, 9, null)),
         ])->id;
         broadcast(new invite($user1->only('id','name'),$user2,$gameId));
         return to_route('game',$gameId);

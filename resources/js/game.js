@@ -92,14 +92,12 @@ function winning(index, A) {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: clamp(80px, 12vw, 150px);
-                font-weight: bold;
-                color: #e8e8e8;
-                text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-                background: linear-gradient(135deg, rgba(255, 107, 107, 0.75), rgba(78, 205, 196, 0.75));
-                border-radius: 15px;
+                font-size: clamp(60px, 10vw, 120px);
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.9);
+                background: rgba(60, 60, 60, 1);
+                border-radius: 8px;
                 z-index: 100;
-                backdrop-filter: blur(3px);
             `;
             mainBoard.appendChild(winnerDisplay);
         }
@@ -247,189 +245,155 @@ export function showSuccess(message, duration = 3000) {
     }
 }
 
-export function showGameWinner(winner, duration = 10000) {
+export function showGameWinner(winner, duration = 8000) {
     // Remove any existing messages first
     removeError();
     removeGameWinner();
     
-    // Create winner overlay
-    const winnerOverlay = document.createElement('div');
-    winnerOverlay.id = 'game-winner-overlay';
-    winnerOverlay.style.cssText = `
+    // Create compact winner toast
+    const winnerToast = document.createElement('div');
+    winnerToast.id = 'game-winner-overlay';
+    winnerToast.style.cssText = `
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(26, 26, 46, 0.95);
-        backdrop-filter: blur(10px);
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: rgba(30, 30, 40, 0.95);
+        backdrop-filter: blur(8px);
         z-index: 2000;
+        padding: 14px 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: all 0.5s ease;
+        gap: 14px;
     `;
     
-    // Create winner content
-    const winnerContent = document.createElement('div');
-    winnerContent.style.cssText = `
-        text-align: center;
-        color: white;
-        padding: 40px;
-        border-radius: 30px;
-        background: linear-gradient(135deg, rgba(79, 172, 254, 0.2), rgba(0, 242, 254, 0.2));
-        border: 2px solid rgba(79, 172, 254, 0.5);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        transform: scale(0.5);
-        transition: all 0.5s ease;
-    `;
-    
-    // Winner symbol
+    // Winner symbol (simple)
     const winnerSymbol = document.createElement('div');
     winnerSymbol.textContent = winner;
     winnerSymbol.style.cssText = `
-        font-size: 120px;
-        font-weight: bold;
-        color: #4facfe;
-        text-shadow: 0 0 30px rgba(79, 172, 254, 0.8);
-        margin-bottom: 20px;
-        animation: winnerBounce 2s infinite;
-    `;
-    
-    // Winner text
-    const winnerText = document.createElement('div');
-    winnerText.innerHTML = `<strong>${winner}</strong> Wins the Game!`;
-    winnerText.style.cssText = `
-        font-size: 36px;
-        font-weight: bold;
-        color: #e8f4fd;
-        margin-bottom: 20px;
-        text-shadow: 0 0 15px rgba(79, 172, 254, 0.6);
-    `;
-    
-    // Celebration message
-    const celebrationText = document.createElement('div');
-    celebrationText.textContent = '🎉 Congratulations! 🎉';
-    celebrationText.style.cssText = `
         font-size: 24px;
-        color: #4facfe;
-        margin-bottom: 30px;
-        animation: sparkleText 1.5s infinite;
+        font-weight: bold;
+        color: #fff;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
     `;
     
-    // Play again button
+    // Text container
+    const textContainer = document.createElement('div');
+    textContainer.style.cssText = `display: flex; flex-direction: column; gap: 1px;`;
+    
+    // Winner text (simple)
+    const winnerText = document.createElement('div');
+    winnerText.innerHTML = `<strong>${winner}</strong> Wins`;
+    winnerText.style.cssText = `
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+    `;
+    
+    // Subtitle
+    const subtitle = document.createElement('div');
+    subtitle.textContent = 'Game Over';
+    subtitle.style.cssText = `
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+    `;
+    
+    textContainer.appendChild(winnerText);
+    textContainer.appendChild(subtitle);
+    
+    // Button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `display: flex; gap: 6px; margin-left: 6px;`;
+    
+    // Play again button (simple)
     const playAgainBtn = document.createElement('button');
-    playAgainBtn.textContent = 'Play Again';
+    playAgainBtn.textContent = 'Replay';
     playAgainBtn.style.cssText = `
-        padding: 15px 30px;
-        font-size: 18px;
-        font-weight: bold;
-        background: linear-gradient(45deg, #4facfe, #00f2fe);
-        color: #1a1a2e;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
         border: none;
-        border-radius: 25px;
+        border-radius: 5px;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-        margin-right: 15px;
+        transition: background 0.2s ease;
     `;
     
-    // Close button
+    // Close button (simple)
     const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
+    closeBtn.textContent = '✕';
     closeBtn.style.cssText = `
-        padding: 15px 30px;
-        font-size: 18px;
-        font-weight: bold;
-        background: rgba(79, 172, 254, 0.2);
-        color: #e8f4fd;
-        border: 2px solid rgba(79, 172, 254, 0.5);
-        border-radius: 25px;
+        padding: 5px 8px;
+        font-size: 11px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.5);
+        border: none;
+        border-radius: 5px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: color 0.2s ease;
     `;
     
-    // Add hover effects
-    playAgainBtn.onmouseover = () => {
-        playAgainBtn.style.transform = 'translateY(-2px)';
-        playAgainBtn.style.boxShadow = '0 6px 20px rgba(79, 172, 254, 0.4)';
-    };
-    playAgainBtn.onmouseout = () => {
-        playAgainBtn.style.transform = 'translateY(0)';
-        playAgainBtn.style.boxShadow = '0 4px 15px rgba(79, 172, 254, 0.3)';
-    };
+    // Hover effects
+    playAgainBtn.onmouseover = () => { playAgainBtn.style.background = 'rgba(255, 255, 255, 0.25)'; };
+    playAgainBtn.onmouseout = () => { playAgainBtn.style.background = 'rgba(255, 255, 255, 0.15)'; };
+    closeBtn.onmouseover = () => { closeBtn.style.color = 'rgba(255, 255, 255, 0.8)'; };
+    closeBtn.onmouseout = () => { closeBtn.style.color = 'rgba(255, 255, 255, 0.5)'; };
     
-    closeBtn.onmouseover = () => {
-        closeBtn.style.background = 'rgba(79, 172, 254, 0.3)';
-        closeBtn.style.transform = 'translateY(-2px)';
-    };
-    closeBtn.onmouseout = () => {
-        closeBtn.style.background = 'rgba(79, 172, 254, 0.2)';
-        closeBtn.style.transform = 'translateY(0)';
-    };
-    
-    // Button event listeners
-    playAgainBtn.onclick = () => {
-        // Add your play again logic here
-        window.location.reload(); // Simple reload for now
-    };
-    
+    // Button actions
+    playAgainBtn.onclick = () => { window.location.reload(); };
     closeBtn.onclick = removeGameWinner;
     
-    // Create button container
-    const buttonContainer = document.createElement('div');
     buttonContainer.appendChild(playAgainBtn);
     buttonContainer.appendChild(closeBtn);
     
-    // Assemble content
-    winnerContent.appendChild(winnerSymbol);
-    winnerContent.appendChild(winnerText);
-    winnerContent.appendChild(celebrationText);
-    winnerContent.appendChild(buttonContainer);
+    // Assemble toast
+    winnerToast.appendChild(winnerSymbol);
+    winnerToast.appendChild(textContainer);
+    winnerToast.appendChild(buttonContainer);
     
-    winnerOverlay.appendChild(winnerContent);
-    document.body.appendChild(winnerOverlay);
-    
-    // Add CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes winnerBounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        @keyframes sparkleText {
-            0%, 100% { opacity: 1; filter: hue-rotate(0deg); }
-            50% { opacity: 0.8; filter: hue-rotate(45deg); }
-        }
-    `;
-    document.head.appendChild(style);
+    document.body.appendChild(winnerToast);
     
     // Animate in
     setTimeout(() => {
-        winnerOverlay.style.opacity = '1';
-        winnerContent.style.transform = 'scale(1)';
-    }, 100);
+        winnerToast.style.opacity = '1';
+        winnerToast.style.transform = 'translateX(-50%) translateY(0)';
+    }, 50);
     
-    // Auto remove after duration (optional)
+    // Auto remove
     if (duration > 0) {
         setTimeout(removeGameWinner, duration);
     }
+    document.getElementById("title").innerHTML = "Game Over - " + winner + " Wins";
+    console.log(document.getElementById("title"));
+    
 }
 
 function removeGameWinner() {
-    const winnerOverlay = document.getElementById('game-winner-overlay');
-    if (winnerOverlay) {
-        winnerOverlay.style.opacity = '0';
-        const content = winnerOverlay.querySelector('div');
-        if (content) {
-            content.style.transform = 'scale(0.5)';
-        }
+    const winnerToast = document.getElementById('game-winner-overlay');
+    if (winnerToast) {
+        winnerToast.style.opacity = '0';
+        winnerToast.style.transform = 'translateX(-50%) translateY(-20px)';
         setTimeout(() => {
-            if (winnerOverlay.parentNode) {
-                winnerOverlay.parentNode.removeChild(winnerOverlay);
+            if (winnerToast.parentNode) {
+                winnerToast.parentNode.removeChild(winnerToast);
             }
-        }, 500);
+        }, 300);
     }
 }
+
+// Make functions available globally for inline onclick handlers and x-init
+window.posision = posision;
+window.showError = showError;
+window.showGameWinner = showGameWinner;

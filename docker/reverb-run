@@ -1,0 +1,3 @@
+#!/command/execlineb -P
+with-contenv
+php /var/www/html/artisan reverb:start --host=127.0.0.1 --port=6001 --hostname=localhost

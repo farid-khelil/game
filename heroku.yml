@@ -1,0 +1,8 @@
+build:
+  docker:
+    web: Dockerfile
+  config:
+    VITE_REVERB_APP_KEY: my-app-key
+    VITE_REVERB_HOST: game-farid-c9999b39f495.herokuapp.com
+    VITE_REVERB_PORT: 443
+    VITE_REVERB_SCHEME: https

@@ -23,4 +23,16 @@ class Game extends Model
     {
         return User::find($this->Xplayer)->only(['id', 'name']);
     }
+    function getOpponentName() 
+    {
+        $userId = auth()->id();
+        if ($this->Oplayer === $userId) {
+            return $this->getXplayer();
+        } elseif ($this->Xplayer === $userId) {
+            return $this->getOplayer();
+        }
+        return null;
+
+        
+    }
 }

@@ -67,7 +67,7 @@
                 });
         "
          >
-            <span>X O</span>
+            X O
             game
         </div>
        
@@ -190,25 +190,23 @@
 
     </script>
     -->
-</body>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Initialize game state after DOM and scripts are loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial board state
+        window.posision(@json($status), {{ $leagalmove }}, @json($board));
+    });
 
-<script type="module">
-    import { posision ,showError } from 'http://[::1]:5173/resources/js/game.js'
-
-    window.paly = function(curentstatus, leagalmove, board) {
-        posision(curentstatus, leagalmove, board);
-    }
-    paly(@json($status), {{ $leagalmove }}, @json($board));
-
-    window.SendMove = function(id) {
-        axios.post("{{route('game.move')}}", {
-            game_id: {{$gameId}},
+    // SendMove function for onclick handlers
+    function SendMove(id) {
+        axios.post("{{ route('game.move') }}", {
+            game_id: {{ $gameId }},
             id: id,
         })
         .catch(error => {
-            showError(error.response.data.message || 'An error occurred');
+            window.showError(error.response?.data?.message || 'An error occurred');
         });
     }
 </script>
+</body>
 </html>
